@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyCAD-APP - 客戶與權限管理後台</title>
+    <!-- 引入 Supabase JS 套件 -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --bg-canvas: #f0f3f6;
+            --surface-white: #ffffff;
+            --steel-dark: #2c3e50;
+            --steel-silver: #7f8c8d;
+            --glass-blue: #3498db;
+            --glass-blue-tint: rgba(52, 152, 219, 0.06);
+            --border-architect: #dcdde1;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-canvas);
+            color: var(--steel-dark);
+            padding: 2.5rem;
+        }
+
+        .container { max-width: 900px; margin: 0 auto; }
+        
+        header {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 2rem; background: var(--surface-white); padding: 1.5rem 2rem;
+            border: 1px solid var(--border-architect); border-radius: 6px;
+        }
+        h1 { font-size: 1.4rem; font-weight: 600; }
+        
+        .card {
+            background: var(--surface-white); border: 1px solid var(--border-architect);
+            border-radius: 6px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+        }
+        h2 { font-size: 1.1rem; margin-bottom: 1rem; }
+
+        .form-row { display: flex; gap: 1rem; margin-bottom: 1rem; }
+        .form-group { flex: 1; }
+        .form-group label { display: block; font-size: 0.8rem; color: var(--steel-silver); margin-bottom: 0.3rem; font-family: monospace; }
+        .form-control { width: 100%; padding: 0.65rem 0.9rem; border: 1px solid var(--border-architect); border-radius: 4px; font-size: 0.9rem; outline: none; }
+        .form-control:focus { border-color: var(--glass-blue); }
+
+        .btn {
+            padding: 0.65rem 1.25rem; background-color: var(--glass-blue); color: white;
+            border: none; border-radius: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s;
+        }
+        .btn:hover { background-color: #2980b9; }
+        .btn-danger { background-color: #e74c3c; }
+        .btn-danger:hover { background-color: #c0392b; }
+
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: var(--surface-white); }
+        th, td { padding: 0.85rem 1rem; text-align: left; border-bottom: 1px solid var(--border-architect); font-size: 0.9rem; }
+        th { background-color: #f8f9fa; color: var(--steel-silver); font-family: monospace; font-size: 0.8rem; text-transform: uppercase; }
+        
+        .msg { font-size: 0.85rem; margin-top: 0.75rem; }
+        .success { color: #27ae60; }
+        .error { color: #e74c3c; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>MyCAD-APP 客戶權限管理後台</h1>
+            <a href="index.html" style="color: var(--glass-blue); text-decoration: none; font-size: 0.9rem; font-weight: 600;">← 返回首頁</a>
+        </header>
+
+        <!-- 新增客戶區塊 -->
+        <div class="card">
+            <h2>新增客戶帳號</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>帳號 (Username)</label>
+                    <input type="text" id="newUsername" class="form-control" placeholder="例如: user02">
+                </div>
+                <div class="form-group">
+                    <label>姓名 / 公司名稱 (Full Name)</label>
+                    <input type="text" id="newFullName" class="form-control" placeholder="例如: 張工程師">
+                </div>
+            </div>
+            <button class="btn" onclick="addClient()">新增客戶至資料庫</button>
+            <div id="addMsg" class="msg"></div>
+        </div>
+
+        <!-- 客戶列表清單 -->
+        <div class="card">
+            <h2>目前客戶列表</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>帳號</th>
+                        <th>姓名 / 公司</th>
+                        <th>狀態</th>
+                        <th>操作</th>
+                    </tr>
+                </thead>
+                <tbody id="clientTableBody">
+                    <tr><td colspan="4" style="text-align: center; color: var(--steel-silver);">正在載入資料...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script>
+        // TODO: 請填入您從 Supabase 專案設定 (Settings -> API) 取得的 URL 與 Anon Public Key
+        const SUPABASE_URL = '您的Supabase專案網址';
+        const SUPABASE_ANON_KEY = '您的Supabase專案AnonKey';
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        window.addEventListener('DOMContentLoaded', () => {
+            fetchClients();
+        });
+
+        // 載入所有客戶清單
+        async function fetchClients() {
+            const tbody = document.getElementById('clientTableBody');
+            const { data, error } = await _supabase.from('profiles').select('*');
+
+            if (error) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: red;">載入失敗: ${error.message}</td></tr>`;
+                return;
+            }
+
+            if (!data || data.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--steel-silver);">目前資料庫沒有客戶記錄。</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = '';
+            data.forEach(client => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td><b>${client.username}</b></td>
+                    <td>${client.full_name || '-'}</td>
+                    <td><span style="color: #27ae60;">${client.is_active ? '啟用中' : '已停用'}</span></td>
+                    <td><button class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="deleteClient('${client.id}')">刪除</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // 新增客戶
+        async function addClient() {
+            const username = document.getElementById('newUsername').value.trim();
+            const fullName = document.getElementById('newFullName').value.trim();
+            const msgBox = document.getElementById('addMsg');
+            msgBox.textContent = '';
+
+            if (!username) {
+                msgBox.className = 'msg error';
+                msgBox.textContent = '帳號不得為空！';
+                return;
+            }
+
+            const { error } = await _supabase.from('profiles').insert([
+                { username: username, full_name: fullName, is_active: true }
+            ]);
+
+            if (error) {
+                msgBox.className = 'msg error';
+                msgBox.textContent = `新增失敗: ${error.message}`;
+            } else {
+                msgBox.className = 'msg success';
+                msgBox.textContent = '成功新增客戶！';
+                document.getElementById('newUsername').value = '';
+                document.getElementById('newFullName').value = '';
+                fetchClients(); // 重新整理列表
+            }
+        }
+
+        // 刪除客戶
+        async function deleteClient(id) {
+            if (!confirm('確定要刪除這位客戶的資料嗎？')) return;
+
+            const { error } = await _supabase.from('profiles').delete().eq('id', id);
+            if (error) {
+                alert(`刪除失敗: ${error.message}`);
+            } else {
+                fetchClients(); // 重新整理列表
+            }
+        }
+    </script>
+</body>
+</html>
