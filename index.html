@@ -3,17 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>現代建築美學 - 專業設計範本</title>
+    <title>MyCAD-APP - 建築與工程 AutoLISP 專業工具庫</title>
     <style>
-        /* CSS 變數：現代建築色彩系統 (灰白、玻璃藍、鋼鐵銀) */
         :root {
-            --bg-canvas: #f0f3f6;            /* 結構背景灰白 */
-            --surface-white: #ffffff;        /* 純白結構本體 */
-            --steel-dark: #2c3e50;           /* 深鋼鐵灰結構文字 */
-            --steel-silver: #95a5a6;         /* 鋼鐵銀次要線條 */
-            --glass-blue: #3498db;           /* 建築玻璃藍亮點 */
-            --glass-blue-tint: rgba(52, 152, 219, 0.06); /* 半透明玻璃藍面 */
-            --border-architect: #dcdde1;     /* 精密工程邊框 */
+            --bg-canvas: #f0f3f6;
+            --surface-white: #ffffff;
+            --steel-dark: #2c3e50;
+            --steel-silver: #7f8c8d;
+            --glass-blue: #3498db;
+            --glass-blue-tint: rgba(52, 152, 219, 0.06);
+            --border-architect: #dcdde1;
             --header-height: 75px;
             --sidebar-width: 270px;
         }
@@ -33,7 +32,7 @@
             min-height: 100vh;
         }
 
-        /* 1. 建築帷幕式頂欄 (Header) */
+        /* 1. 建築帷幕頂欄 */
         header {
             position: fixed;
             top: 0;
@@ -41,7 +40,7 @@
             width: 100%;
             height: var(--header-height);
             background-color: rgba(255, 255, 255, 0.9);
-            backdrop-filter: blur(10px); /* 現代玻璃帷幕模糊質感 */
+            backdrop-filter: blur(10px);
             border-bottom: 1px solid var(--border-architect);
             display: flex;
             align-items: center;
@@ -85,7 +84,7 @@
             flex: 1;
         }
 
-        /* 2. 結構側邊選單 (Sidebar) */
+        /* 2. 結構側邊選單 */
         sidebar {
             width: var(--sidebar-width);
             background-color: var(--surface-white);
@@ -116,26 +115,29 @@
             gap: 0.75rem;
         }
 
-        .nav-list li a {
+        .nav-list li button {
+            width: 100%;
+            background: none;
+            border: 1px solid transparent;
             display: flex;
             align-items: center;
             justify-content: space-between;
             padding: 0.85rem 1rem;
             color: var(--steel-dark);
-            text-decoration: none;
+            text-align: left;
             font-size: 0.9rem;
             border-radius: 2px;
+            cursor: pointer;
             transition: all 0.25s ease;
-            border: 1px solid transparent;
         }
 
-        .nav-list li a:hover, .nav-list li a.active {
+        .nav-list li button:hover, .nav-list li button.active {
             background-color: var(--glass-blue-tint);
             color: var(--glass-blue);
             border-color: rgba(52, 152, 219, 0.3);
         }
 
-        /* 3. 內容主軸區塊 (Main Content) */
+        /* 3. 內容主軸區塊 */
         main {
             margin-left: var(--sidebar-width);
             flex: 1;
@@ -146,14 +148,13 @@
         .hero-banner {
             background: linear-gradient(135deg, var(--surface-white) 0%, var(--glass-blue-tint) 100%);
             border: 1px solid var(--border-architect);
-            padding: 3rem;
+            padding: 2.5rem;
             border-radius: 4px;
-            margin-bottom: 2.5rem;
+            margin-bottom: 2rem;
             position: relative;
             overflow: hidden;
         }
 
-        /* 模擬建築圖面格線背景 */
         .hero-banner::after {
             content: "";
             position: absolute;
@@ -171,24 +172,40 @@
         }
 
         .hero-banner h1 {
-            font-size: 2.2rem;
-            font-weight: 400;
-            letter-spacing: 1px;
-            margin-bottom: 0.75rem;
+            font-size: 1.8rem;
+            font-weight: 500;
+            margin-bottom: 0.5rem;
             color: var(--steel-dark);
         }
 
         .hero-banner p {
             color: var(--steel-silver);
-            font-size: 1rem;
-            max-width: 600px;
-            line-height: 1.6;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
         }
 
-        /* 建築模組卡片格線 */
+        /* 即時搜尋框樣式 */
+        .search-box {
+            width: 100%;
+            max-width: 500px;
+            padding: 0.85rem 1.2rem;
+            border: 1px solid var(--border-architect);
+            border-radius: 4px;
+            font-size: 0.95rem;
+            outline: none;
+            background-color: var(--surface-white);
+            transition: border-color 0.2s;
+        }
+
+        .search-box:focus {
+            border-color: var(--glass-blue);
+            box-shadow: 0 0 8px rgba(52, 152, 219, 0.2);
+        }
+
+        /* 程式工具卡片格線 */
         .architect-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
             gap: 1.5rem;
         }
 
@@ -196,40 +213,75 @@
             background-color: var(--surface-white);
             border: 1px solid var(--border-architect);
             border-radius: 4px;
-            padding: 2rem;
+            padding: 1.5rem;
             position: relative;
             transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
         }
 
         .architect-card:hover {
-            transform: translateY(-4px);
+            transform: translateY(-3px);
             border-color: var(--glass-blue);
-            box-shadow: 0 10px 30px rgba(52, 152, 219, 0.08);
+            box-shadow: 0 8px 20px rgba(52, 152, 219, 0.08);
+        }
+
+        .card-header-flex {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.75rem;
         }
 
         .card-tag {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             font-family: monospace;
             color: var(--glass-blue);
             text-transform: uppercase;
-            margin-bottom: 0.75rem;
-            display: block;
+        }
+
+        .card-ext {
+            font-size: 0.7rem;
+            background: #eef2f5;
+            padding: 2px 6px;
+            border-radius: 3px;
+            color: var(--steel-silver);
         }
 
         .architect-card h3 {
-            font-size: 1.2rem;
+            font-size: 1.1rem;
             font-weight: 600;
-            margin-bottom: 0.75rem;
+            margin-bottom: 0.5rem;
             color: var(--steel-dark);
         }
 
         .architect-card p {
             color: var(--steel-silver);
-            font-size: 0.92rem;
-            line-height: 1.6;
+            font-size: 0.88rem;
+            line-height: 1.5;
+            margin-bottom: 1.25rem;
         }
 
-        /* 響應式佈局適配 */
+        .download-btn {
+            display: inline-block;
+            text-align: center;
+            padding: 0.6rem 1rem;
+            background-color: var(--glass-blue-tint);
+            color: var(--glass-blue);
+            border: 1px solid rgba(52, 152, 219, 0.3);
+            text-decoration: none;
+            font-size: 0.85rem;
+            border-radius: 3px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .download-btn:hover {
+            background-color: var(--glass-blue);
+            color: white;
+        }
+
         @media (max-width: 768px) {
             sidebar {
                 transform: translateX(-100%);
@@ -251,23 +303,22 @@
     <header>
         <div class="brand">
             <div class="brand-indicator"></div>
-            ARCHI<span>CAD</span>_SYSTEM
+            MYCAD<span>-APP</span>
         </div>
         <div class="header-meta">
-            SYS.REF // 2026.ARCH
+            LISP.LIBRARY // 200+ TOOLS
         </div>
     </header>
 
     <div class="layout-container">
-        <!-- 結構側邊選單 -->
+        <!-- 結構側邊選單 (支援類別切換) -->
         <sidebar>
-            <div class="nav-section-title">Spatial Navigation</div>
-            <ul class="nav-list">
-                <li><a href="#" class="active">空間參數總覽 <span>[01]</span></a></li>
-                <li><a href="#">帷幕幾何分析 <span>[02]</span></a></li>
-                <li><a href="#">結構斷面模組 <span>[03]</span></a></li>
-                <li><a href="#">材料與表面規範 <span>[04]</span></a></li>
-                <li><a href="#">系統日誌與授權 <span>[05]</span></a></li>
+            <div class="nav-section-title">Tool Categories</div>
+            <ul class="nav-list" id="categoryList">
+                <li><button class="active" onclick="filterCategory('all', this)">全部工具庫 <span>[ALL]</span></button></li>
+                <li><button onclick="filterCategory('architectural', this)">建築製圖模組 <span>[ARC]</span></button></li>
+                <li><button onclick="filterCategory('geometry', this)">幾何與標註 <span>[DIM]</span></button></li>
+                <li><button onclick="filterCategory('utility', this)">資料與計算 <span>[UTL]</span></button></li>
             </ul>
         </sidebar>
 
@@ -275,30 +326,110 @@
         <main>
             <div class="hero-banner">
                 <div class="hero-content">
-                    <h1>參數式建築空間解析系統</h1>
-                    <p>結合現代灰白混凝土基調與玻璃帷幕反射光學設計，建構高精準度、高辨識度的專業建築工程介面。</p>
+                    <h1>AutoLISP 專業工具庫檢索</h1>
+                    <p>快速搜尋與下載您的 200 支建築與工程優化 `.fas` 程式模組。</p>
+                    <!-- 即時搜尋輸入框 -->
+                    <input type="text" id="searchInput" class="search-box" placeholder="輸入關鍵字搜尋工具（例如：樓梯、面積、AvgZ...）" onkeyup="filterTools()">
                 </div>
             </div>
 
-            <div class="architect-grid">
-                <div class="architect-card">
-                    <span class="card-tag">Module // 01</span>
-                    <h3>玻璃藍透視光學</h3>
-                    <p>利用高科技半透明玻璃藍色調與毛玻璃背景模糊（Backdrop Blur），完美營造現代高層建築帷幕的理性與冷靜氛圍。</p>
+            <!-- 工具卡片列表 (未來可透過後續指令擴充至 200 支) -->
+            <div class="architect-grid" id="toolGrid">
+                
+                <!-- 卡片 1 -->
+                <div class="architect-card" data-category="architectural" data-name="參數式畫樓梯剖面 樓梯剖面 參數式">
+                    <div>
+                        <div class="card-header-flex">
+                            <span class="card-tag">Architectural // ARC-01</span>
+                            <span class="card-ext">.FAS</span>
+                        </div>
+                        <h3>參數式畫樓梯剖面</h3>
+                        <p>透過參數式試算表快速繪製精準的樓梯剖面圖，大幅提升繪圖效率。</p>
+                    </div>
+                    <a href="#" class="download-btn">下載程式 (.fas)</a>
                 </div>
-                <div class="architect-card">
-                    <span class="card-tag">Module // 02</span>
-                    <h3>鋼鐵銀工程格線</h3>
-                    <p>主視覺背景融入建築工程圖面（Blueprint）風格的精確網格與極細結構邊框，展現嚴謹的金屬工藝美學。</p>
+
+                <!-- 卡片 2 -->
+                <div class="architect-card" data-category="geometry" data-name="PLINE 快速標面積 聚合線 面積周長 PL-DIM">
+                    <div>
+                        <div class="card-header-flex">
+                            <span class="card-tag">Geometry // DIM-01</span>
+                            <span class="card-ext">.FAS</span>
+                        </div>
+                        <h3>PL-DIM 聚合線標面積</h3>
+                        <p>支援聚合線 (PLINE) 快速標註面積及統計周長，並可進行編號與快速標面積。</p>
+                    </div>
+                    <a href="#" class="download-btn">下載程式 (.fas)</a>
                 </div>
-                <div class="architect-card">
-                    <span class="card-tag">Module // 03</span>
-                    <h3>響應式極簡結構</h3>
-                    <p>如同現代模組化建築，介面具備極佳的適應性，無論在大尺寸桌面工作站或行動載具上皆能維持完美的幾何比例。</p>
+
+                <!-- 卡片 3 -->
+                <div class="architect-card" data-category="utility" data-name="AvgZ 座標平均 坐標計算">
+                    <div>
+                        <div class="card-header-flex">
+                            <span class="card-tag">Utility // UTL-01</span>
+                            <span class="card-ext">.FAS</span>
+                        </div>
+                        <h3>AvgZ 座標與數值平均</h3>
+                        <p>專為工程計算設計的座標與標高平均值快速計算輔助工具。</p>
+                    </div>
+                    <a href="#" class="download-btn">下載程式 (.fas)</a>
                 </div>
+
+                <!-- 卡片 4 -->
+                <div class="architect-card" data-category="architectural" data-name="步行距離 標尺寸 距離標註">
+                    <div>
+                        <div class="card-header-flex">
+                            <span class="card-tag">Architectural // ARC-02</span>
+                            <span class="card-ext">.FAS</span>
+                        </div>
+                        <h3>步行距離尺寸標註</h3>
+                        <p>提供便於建築法規檢討與計算步行距離尺寸的專用標註功能。</p>
+                    </div>
+                    <a href="#" class="download-btn">下載程式 (.fas)</a>
+                </div>
+
             </div>
         </main>
     </div>
 
+    <!-- 即時過濾 JavaScript 邏輯 -->
+    <script>
+        let currentCategory = 'all';
+
+        function filterCategory(category, btnElement) {
+            currentCategory = category;
+            
+            // 更新按鈕樣式
+            document.querySelectorAll('.nav-list button').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            applyFilters();
+        }
+
+        function filterTools() {
+            applyFilters();
+        }
+
+        function applyFilters() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.architect-card');
+
+            cards.forEach(card => {
+                const category = card.getAttribute('data-category');
+                const nameKeywords = card.getAttribute('data-name').toLowerCase();
+                const titleText = card.querySelector('h3').textContent.toLowerCase();
+                const descText = card.querySelector('p').textContent.toLowerCase();
+
+                const matchesCategory = (currentCategory === 'all' || category === currentCategory);
+                const matchesQuery = (nameKeywords.includes(query) || titleText.includes(query) || descText.includes(query));
+
+                if (matchesCategory && matchesQuery) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+    </script>
 </body>
 </html>
