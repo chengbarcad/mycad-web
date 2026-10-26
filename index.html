@@ -185,8 +185,10 @@
             const grid = document.getElementById('toolGrid');
             grid.innerHTML = '';
 
-            tools.forEach(tool => {
-                let count = localStorage.getItem(`mycad_download_${tool.id}`) || 0;
+            tools.forEach((tool, index) => {
+                // 改用 filename 結合索引來作為下載次數的儲存鍵值
+                const storageKey = `mycad_download_${tool.filename}_${index}`;
+                let count = localStorage.getItem(storageKey) || 0;
 
                 const card = document.createElement('div');
                 card.className = 'architect-card';
@@ -194,13 +196,13 @@
                 card.innerHTML = `
                     <div>
                         <div class="card-header-flex">
-                            <span class="card-tag">${tool.category} // ${tool.code}</span>
-                            <span class="download-count" id="count-${tool.id}">下載: ${count} 次</span>
+                            <span class="card-tag">${tool.category}</span>
+                            <span class="download-count" id="count-${index}">下載: ${count} 次</span>
                         </div>
                         <h3>${tool.name}</h3>
                         <p>${tool.description}</p>
                     </div>
-                    <button class="download-btn" onclick="checkAndDownload('${tool.id}', '${tool.filename}')">下載 ${tool.filename}</button>
+                    <button class="download-btn" onclick="checkAndDownload('${storageKey}', '${tool.filename}', '${index}')">下載 ${tool.filename}</button>
                 `;
                 grid.appendChild(card);
             });
@@ -269,13 +271,13 @@
             document.getElementById('headerStatus').textContent = '系統狀態：訪客瀏覽 (未登入)';
         }
 
-        async function checkAndDownload(toolId, fileName) {
+        async function checkAndDownload(storageKey, fileName, index) {
             try {
                 const response = await fetch(fileName, { method: 'HEAD' });
                 if (response.ok) {
-                    let count = parseInt(localStorage.getItem(`mycad_download_${toolId}`) || 0) + 1;
-                    localStorage.setItem(`mycad_download_${toolId}`, count);
-                    document.getElementById(`count-${toolId}`).textContent = `下載: ${count} 次`;
+                    let count = parseInt(localStorage.getItem(storageKey) || 0) + 1;
+                    localStorage.setItem(storageKey, count);
+                    document.getElementById(`count-${index}`).textContent = `下載: ${count} 次`;
 
                     const link = document.createElement('a');
                     link.href = fileName;
