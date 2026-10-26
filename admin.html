@@ -8,20 +8,22 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root {
-            --bg-canvas: #f0f3f6;
-            --surface-white: #ffffff;
-            --steel-dark: #2c3e50;
-            --steel-silver: #7f8c8d;
-            --glass-blue: #3498db;
-            --glass-blue-tint: rgba(52, 152, 219, 0.06);
-            --border-architect: #dcdde1;
+            --bg-canvas: #121212;
+            --surface-card: #1a1a1a;
+            --text-main: #f0f3f6;
+            --text-muted: #95a5a6;
+            --bronze-accent: #c09159;
+            --bronze-hover: #d4a36b;
+            --bronze-tint: rgba(192, 145, 89, 0.08);
+            --border-architect: #2d2d2d;
+            --danger-color: #e74c3c;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-canvas);
-            color: var(--steel-dark);
+            color: var(--text-main);
             padding: 2.5rem;
         }
 
@@ -29,38 +31,43 @@
         
         header {
             display: flex; justify-content: space-between; align-items: center;
-            margin-bottom: 2rem; background: var(--surface-white); padding: 1.5rem 2rem;
-            border: 1px solid var(--border-architect); border-radius: 6px;
+            margin-bottom: 2rem; background: var(--surface-card); padding: 1.5rem 2rem;
+            border: 1px solid var(--border-architect); border-radius: 4px;
         }
-        h1 { font-size: 1.4rem; font-weight: 600; }
+        h1 { font-size: 1.4rem; font-weight: 500; letter-spacing: 1px; color: var(--text-main); }
         
         .card {
-            background: var(--surface-white); border: 1px solid var(--border-architect);
-            border-radius: 6px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            background: var(--surface-card); border: 1px solid var(--border-architect);
+            border-radius: 4px; padding: 2rem; margin-bottom: 2rem; box-shadow: 0 4px 20px rgba(0,0,0,0.4);
         }
-        h2 { font-size: 1.1rem; margin-bottom: 1rem; }
+        h2 { font-size: 1.1rem; margin-bottom: 1rem; color: var(--text-main); font-weight: 500; }
 
         .form-row { display: flex; gap: 1rem; margin-bottom: 1rem; }
         .form-group { flex: 1; }
-        .form-group label { display: block; font-size: 0.8rem; color: var(--steel-silver); margin-bottom: 0.3rem; font-family: monospace; }
-        .form-control { width: 100%; padding: 0.65rem 0.9rem; border: 1px solid var(--border-architect); border-radius: 4px; font-size: 0.9rem; outline: none; }
-        .form-control:focus { border-color: var(--glass-blue); }
+        .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem; font-family: monospace; }
+        .form-control { 
+            width: 100%; padding: 0.65rem 0.9rem; 
+            background: var(--bg-canvas); border: 1px solid var(--border-architect); 
+            border-radius: 4px; font-size: 0.9rem; outline: none; color: var(--text-main); 
+        }
+        .form-control:focus { border-color: var(--bronze-accent); }
 
         .btn {
-            padding: 0.65rem 1.25rem; background-color: var(--glass-blue); color: white;
+            padding: 0.65rem 1.25rem; background-color: var(--bronze-accent); color: #121212;
             border: none; border-radius: 4px; font-size: 0.9rem; font-weight: 600; cursor: pointer; transition: background 0.2s;
         }
-        .btn:hover { background-color: #2980b9; }
-        .btn-danger { background-color: #e74c3c; }
+        .btn:hover { background-color: var(--bronze-hover); }
+        .btn-danger { background-color: var(--danger-color); color: white; }
         .btn-danger:hover { background-color: #c0392b; }
 
-        table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: var(--surface-white); }
+        table { width: 100%; border-collapse: collapse; margin-top: 1rem; background: var(--surface-card); }
         th, td { padding: 0.85rem 1rem; text-align: left; border-bottom: 1px solid var(--border-architect); font-size: 0.9rem; }
-        th { background-color: #f8f9fa; color: var(--steel-silver); font-family: monospace; font-size: 0.8rem; text-transform: uppercase; }
+        th { background-color: #161616; color: var(--text-muted); font-family: monospace; font-size: 0.8rem; text-transform: uppercase; }
         
         .msg { font-size: 0.85rem; margin-top: 0.75rem; }
-        .success { color: #27ae60; }
-        .error { color: #e74c3c; }
+        .success { color: #2ecc71; }
+        .error { color: var(--danger-color); }
+        code { color: var(--bronze-accent); font-family: monospace; }
     </style>
 </head>
 <body>
@@ -69,12 +76,12 @@
     <div id="adminLoginBox" class="container" style="max-width: 400px; margin-top: 5rem;">
         <div class="card">
             <h2>管理員後台驗證</h2>
-            <p style="font-size: 0.85rem; color: var(--steel-silver); margin-bottom: 1.2rem;">請輸入資料庫中 admin 帳號的密碼</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.2rem;">請輸入資料庫中 admin 帳號的密碼</p>
             <div class="form-group">
                 <label>管理員密碼 (Admin Password)</label>
                 <input type="password" id="adminPasswordInput" class="form-control" placeholder="請輸入密碼">
             </div>
-            <button class="btn" style="width: 100%;" onclick="verifyAdmin()">驗證並進入</button>
+            <button class="btn" style="width: 100%; margin-top: 0.5rem;" onclick="verifyAdmin()">驗證並進入</button>
             <div id="loginError" class="msg error" style="text-align: center;"></div>
         </div>
     </div>
@@ -83,7 +90,7 @@
     <div id="adminMainContent" class="container" style="display: none;">
         <header>
             <h1>MyCAD-APP 客戶權限管理後台</h1>
-            <a href="index.html" style="color: var(--glass-blue); text-decoration: none; font-size: 0.9rem; font-weight: 600;">← 返回首頁</a>
+            <a href="index.html" style="color: var(--bronze-accent); text-decoration: none; font-size: 0.9rem; font-weight: 600;">← 返回首頁</a>
         </header>
 
         <!-- 新增客戶區塊 -->
@@ -121,7 +128,7 @@
                     </tr>
                 </thead>
                 <tbody id="clientTableBody">
-                    <tr><td colspan="5" style="text-align: center; color: var(--steel-silver);">正在載入資料...</td></tr>
+                    <tr><td colspan="5" style="text-align: center; color: var(--text-muted);">正在載入資料...</td></tr>
                 </tbody>
             </table>
         </div>
@@ -132,7 +139,6 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_iNASGZHnISSXXY9Egnw7TA_dAvzCSO1';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // 直接向 Supabase 資料庫查詢 admin 的密碼來進行驗證
         async function verifyAdmin() {
             const inputVal = document.getElementById('adminPasswordInput').value.trim();
             const errBox = document.getElementById('loginError');
@@ -144,7 +150,6 @@
             }
 
             try {
-                // 從 profiles 表格中抓取 username 為 admin 的那筆資料
                 const { data, error } = await _supabase
                     .from('profiles')
                     .select('*')
@@ -156,7 +161,6 @@
                     return;
                 }
 
-                // 比對輸入的密碼是否與資料庫中的 pws 相符
                 if (data.pws === inputVal) {
                     document.getElementById('adminLoginBox').style.display = 'none';
                     document.getElementById('adminMainContent').style.display = 'block';
@@ -169,18 +173,17 @@
             }
         }
 
-        // 載入所有客戶清單
         async function fetchClients() {
             const tbody = document.getElementById('clientTableBody');
             const { data, error } = await _supabase.from('profiles').select('*');
 
             if (error) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">載入失敗: ${error.message}</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--danger-color);">載入失敗: ${error.message}</td></tr>`;
                 return;
             }
 
             if (!data || data.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--steel-silver);">目前資料庫沒有客戶記錄。</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: var(--text-muted);">目前資料庫沒有客戶記錄。</td></tr>`;
                 return;
             }
 
@@ -191,14 +194,13 @@
                     <td><b>${client.username}</b></td>
                     <td>${client.full_name || '-'}</td>
                     <td><code>${client.pws || '-'}</code></td>
-                    <td><span style="color: #27ae60;">${client.is_active ? '啟用中' : '已停用'}</span></td>
+                    <td><span style="color: #2ecc71;">${client.is_active ? '啟用中' : '已停用'}</span></td>
                     <td><button class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="deleteClient('${client.id}')">刪除</button></td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // 新增客戶
         async function addClient() {
             const username = document.getElementById('newUsername').value.trim();
             const fullName = document.getElementById('newFullName').value.trim();
@@ -234,7 +236,6 @@
             }
         }
 
-        // 刪除客戶
         async function deleteClient(id) {
             if (!confirm('確定要刪除這位客戶的資料嗎？')) return;
 
