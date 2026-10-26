@@ -1,0 +1,10 @@
+[
+  {
+    "id": "bpoly",
+    "code": "DIM-01",
+    "category": "geometry",
+    "name": "bpolycheck234 檢查工具",
+    "filename": "bpolycheck234.fas",
+    "description": "專為圖面邊界與聚合線檢查設計的實用 AutoLISP 輔助程式。"
+  }
+]
