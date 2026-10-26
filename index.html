@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyCAD-APP - AutoLISP 工具庫</title>
+    <title>MyCAD-APP - 自動化工具庫</title>
     <style>
         :root {
             --bg-canvas: #f0f3f6;
@@ -98,7 +98,7 @@
             MYCAD<span>-APP</span>
         </div>
         <div class="header-meta">
-            ROOT SYSTEM // LISP TOOLS
+            AUTO-GENERATED SYSTEM // LISP TOOLS
         </div>
     </header>
 
@@ -115,38 +115,58 @@
 
         <main>
             <div class="hero-banner">
-                <h1>AutoLISP 專業工具庫</h1>
-                <p>直接從根目錄讀取 `.fas` 檔案，支援即時檢驗與下載次數統計。</p>
-                <input type="text" id="searchInput" class="search-box" placeholder="輸入關鍵字搜尋工具（例如：bpolycheck...）" onkeyup="filterTools()">
+                <h1>AutoLISP 專業工具庫（動態自動生成）</h1>
+                <p>上傳檔案並更新設定檔後，網頁會自動渲染卡片，支援下載統計與檔案檢查。</p>
+                <input type="text" id="searchInput" class="search-box" placeholder="輸入關鍵字搜尋工具..." onkeyup="filterTools()">
             </div>
 
-            <div class="architect-grid" id="toolGrid">
-                
-                <!-- 對應您已上傳的 bpolycheck234.fas -->
-                <div class="architect-card" data-category="geometry" data-name="bpolycheck234 檢查工具">
-                    <div>
-                        <div class="card-header-flex">
-                            <span class="card-tag">Geometry // DIM-01</span>
-                            <span class="download-count" id="count-bpoly">下載: 0 次</span>
-                        </div>
-                        <h3>bpolycheck234 檢查工具</h3>
-                        <p>專為圖面邊界與聚合線檢查設計的實用 AutoLISP 輔助程式。</p>
-                    </div>
-                    <button class="download-btn" onclick="checkAndDownload('bpoly', 'bpolycheck234.fas')">下載程式 (.fas)</button>
-                </div>
-
-            </div>
+            <!-- 卡片會由 JavaScript 自動填入這裡 -->
+            <div class="architect-grid" id="toolGrid"></div>
         </main>
     </div>
 
     <script>
+        let allTools = [];
+
         window.addEventListener('DOMContentLoaded', () => {
-            loadCounts();
+            loadToolsData();
         });
 
-        function loadCounts() {
-            let count = localStorage.getItem('mycad_download_bpoly') || 0;
-            document.getElementById('count-bpoly').textContent = `下載: ${count} 次`;
+        // 自動讀取 tools.json 並生成卡片
+        async function loadToolsData() {
+            try {
+                const response = await fetch('tools.json');
+                allTools = await response.json();
+                renderCards(allTools);
+            } catch (error) {
+                document.getElementById('toolGrid').innerHTML = '<p style="color:red;">無法載入 tools.json 設定檔，請確認是否已建立。</p>';
+            }
+        }
+
+        function renderCards(tools) {
+            const grid = document.getElementById('toolGrid');
+            grid.innerHTML = '';
+
+            tools.forEach(tool => {
+                let count = localStorage.getItem(`mycad_download_${tool.id}`) || 0;
+
+                const card = document.createElement('div');
+                card.className = 'architect-card';
+                card.setAttribute('data-category', tool.category);
+                card.setAttribute('data-name', tool.name);
+                card.innerHTML = `
+                    <div>
+                        <div class="card-header-flex">
+                            <span class="card-tag">${tool.category} // ${tool.code}</span>
+                            <span class="download-count" id="count-${tool.id}">下載: ${count} 次</span>
+                        </div>
+                        <h3>${tool.name}</h3>
+                        <p>${tool.description}</p>
+                    </div>
+                    <button class="download-btn" onclick="checkAndDownload('${tool.id}', '${tool.filename}')">下載程式 (.fas)</button>
+                `;
+                grid.appendChild(card);
+            });
         }
 
         async function checkAndDownload(toolId, fileName) {
@@ -175,6 +195,15 @@
         function filterCategory(category, btnElement) {
             document.querySelectorAll('.nav-list button').forEach(btn => btn.classList.remove('active'));
             btnElement.classList.add('active');
+
+            const cards = document.querySelectorAll('.architect-card');
+            cards.forEach(card => {
+                if (category === 'all' || card.getAttribute('data-category') === category) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
         }
 
         function filterTools() {
