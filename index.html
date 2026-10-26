@@ -117,12 +117,16 @@
             <div class="nav-section-title">Member Authentication</div>
             
             <div id="loginSection">
-                <p style="font-size: 0.85rem; color: var(--steel-silver); margin-bottom: 1rem;">請輸入已註冊的帳號登入</p>
+                <p style="font-size: 0.85rem; color: var(--steel-silver); margin-bottom: 1rem;">請輸入您的帳號與密碼</p>
                 <div class="form-group">
                     <label>帳號 (Username)</label>
-                    <input type="text" id="usernameInput" class="form-control" placeholder="例如: admin 或 001">
+                    <input type="text" id="usernameInput" class="form-control" placeholder="例如: admin">
                 </div>
-                <button class="btn" onclick="handleLogin()">驗證並登入</button>
+                <div class="form-group">
+                    <label>密碼 (Password)</label>
+                    <input type="password" id="passwordInput" class="form-control" placeholder="請輸入密碼">
+                </div>
+                <button class="btn" onclick="handleLogin()">安全登入</button>
                 <div id="errorMsg" class="error-msg"></div>
             </div>
 
@@ -201,34 +205,38 @@
             }
         }
 
+        // 使用 Supabase 進行真實帳號密碼驗證
         async function handleLogin() {
             const uInput = document.getElementById('usernameInput').value.trim();
+            const pInput = document.getElementById('passwordInput').value.trim();
             const errBox = document.getElementById('errorMsg');
             errBox.textContent = '';
 
-            if (!uInput) {
-                errBox.textContent = '請輸入帳號';
+            if (!uInput || !pInput) {
+                errBox.textContent = '請輸入帳號與密碼';
                 return;
             }
 
             try {
-                const { data, error } = await _supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('username', uInput)
-                    .eq('is_active', true)
-                    .single();
+                // 將自訂帳號轉成內部登入用的 Email 格式 (例如 admin@mycad.internal)
+                const loginEmail = `${uInput}@mycad.internal`;
 
-                if (error || !data) {
-                    errBox.textContent = '查無此帳號或帳號未啟用';
-                    return;
-                }
+                const { data, error } = await _supabase.auth.signInWithPassword({
+                    email: loginEmail,
+                    password: pInput
+                });
 
-                sessionStorage.setItem('mycad_logged_name', data.full_name || data.username);
-                activateLoginUI(data.full_name || data.username);
+                if (error) throw error;
+
+                // 從登入成功後的資料中取得姓名
+                const user = data.user;
+                const displayName = user.user_metadata?.full_name || uInput;
+
+                sessionStorage.setItem('mycad_logged_name', displayName);
+                activateLoginUI(displayName);
 
             } catch (err) {
-                errBox.textContent = '登入驗證發生錯誤';
+                errBox.textContent = '帳號或密碼錯誤！';
             }
         }
 
@@ -241,11 +249,13 @@
         }
 
         function handleLogout() {
+            _supabase.auth.signOut();
             sessionStorage.removeItem('mycad_logged_name');
             document.body.classList.remove('logged-in');
             document.getElementById('loginSection').style.display = 'block';
             document.getElementById('userPanelSection').style.display = 'none';
             document.getElementById('usernameInput').value = '';
+            document.getElementById('passwordInput').value = '';
             document.getElementById('headerStatus').textContent = '系統狀態：訪客瀏覽 (未登入)';
         }
 
