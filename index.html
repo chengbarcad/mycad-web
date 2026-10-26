@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyCAD-APP - AutoLISP 工具庫 (TXT 紀錄版)</title>
+    <title>MyCAD-APP - AutoLISP 工具庫 (檔案檢驗版)</title>
     <style>
         :root {
             --bg-canvas: #f0f3f6;
@@ -27,7 +27,6 @@
             min-height: 100vh;
         }
 
-        /* 頂欄 */
         header {
             position: fixed; top: 0; left: 0; width: 100%; height: var(--header-height);
             background-color: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px);
@@ -42,7 +41,6 @@
 
         .layout-container { display: flex; margin-top: var(--header-height); flex: 1; }
 
-        /* 側邊選單 */
         sidebar {
             width: var(--sidebar-width); background-color: var(--surface-white);
             border-right: 1px solid var(--border-architect); padding: 2.5rem 1.5rem;
@@ -60,7 +58,6 @@
             background-color: var(--glass-blue-tint); color: var(--glass-blue); border-color: rgba(52, 152, 219, 0.3);
         }
 
-        /* 主內容 */
         main { margin-left: var(--sidebar-width); flex: 1; padding: 3rem; max-width: calc(100% - var(--sidebar-width)); }
         .hero-banner {
             background: linear-gradient(135deg, var(--surface-white) 0%, var(--glass-blue-tint) 100%);
@@ -70,7 +67,6 @@
         .hero-banner p { color: var(--steel-silver); font-size: 0.95rem; margin-bottom: 1.5rem; }
         .search-box { width: 100%; max-width: 500px; padding: 0.85rem 1.2rem; border: 1px solid var(--border-architect); border-radius: 4px; font-size: 0.95rem; outline: none; background: var(--surface-white); }
 
-        /* 卡片網格 */
         .architect-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
         .architect-card {
             background-color: var(--surface-white); border: 1px solid var(--border-architect);
@@ -102,7 +98,7 @@
             MYCAD<span>-APP</span>
         </div>
         <div class="header-meta">
-            TXT STORAGE SYSTEM // 200+ TOOLS
+            FILE CHECK SYSTEM // 200+ TOOLS
         </div>
     </header>
 
@@ -119,8 +115,8 @@
 
         <main>
             <div class="hero-banner">
-                <h1>AutoLISP 專業工具庫（TXT 輕量計數）</h1>
-                <p>透過前端模擬資料庫與本地狀態，即時統計與管理 .fas 檔案下載次數。</p>
+                <h1>AutoLISP 專業工具庫（具備檔案存在性檢驗）</h1>
+                <p>點擊下載時自動檢測伺服器中對應的 `.fas` 檔案是否存在，並同步累計下載次數。</p>
                 <input type="text" id="searchInput" class="search-box" placeholder="輸入關鍵字搜尋工具（例如：樓梯、面積、AvgZ...）" onkeyup="filterTools()">
             </div>
 
@@ -135,7 +131,8 @@
                         <h3>參數式畫樓梯剖面</h3>
                         <p>透過參數式試算表快速繪製精準的樓梯剖面圖，大幅提升繪圖效率。</p>
                     </div>
-                    <button class="download-btn" onclick="recordDownload('stair', 'stair_profile.fas')">下載程式 (.fas)</button>
+                    <!-- 帶入真實檔案路徑，例如 files/stair_profile.fas -->
+                    <button class="download-btn" onclick="checkAndDownload('stair', 'files/stair_profile.fas')">下載程式 (.fas)</button>
                 </div>
 
                 <div class="architect-card" data-category="geometry" data-name="PL-DIM 聚合線標面積">
@@ -147,7 +144,7 @@
                         <h3>PL-DIM 聚合線標面積</h3>
                         <p>支援聚合線 (PLINE) 快速標註面積及統計周長，並可進行編號與快速標面積。</p>
                     </div>
-                    <button class="download-btn" onclick="recordDownload('pldim', 'PL-DIM.fas')">下載程式 (.fas)</button>
+                    <button class="download-btn" onclick="checkAndDownload('pldim', 'files/PL-DIM.fas')">下載程式 (.fas)</button>
                 </div>
 
                 <div class="architect-card" data-category="utility" data-name="AvgZ 座標與數值平均">
@@ -159,7 +156,7 @@
                         <h3>AvgZ 座標與數值平均</h3>
                         <p>專為工程計算設計的座標與標高平均值快速計算輔助工具。</p>
                     </div>
-                    <button class="download-btn" onclick="recordDownload('avgz', 'AvgZ.fas')">下載程式 (.fas)</button>
+                    <button class="download-btn" onclick="checkAndDownload('avgz', 'files/AvgZ.fas')">下載程式 (.fas)</button>
                 </div>
 
             </div>
@@ -167,7 +164,6 @@
     </div>
 
     <script>
-        // 初始化載入下載次數（對應 TXT 資料庫概念）
         window.addEventListener('DOMContentLoaded', () => {
             loadCounts();
         });
@@ -180,20 +176,35 @@
             });
         }
 
-        function recordDownload(toolId, fileName) {
-            // 讀取現有次數並 +1
-            let count = parseInt(localStorage.getItem(`mycad_download_${toolId}`) || 0) + 1;
-            
-            // 寫回「資料庫」（模擬 TXT 儲存）
-            localStorage.setItem(`mycad_download_${toolId}`, count);
-            
-            // 即時更新畫面上的下載次數
-            document.getElementById(`count-${toolId}`).textContent = `下載: ${count} 次`;
+        // 核心：檢查檔案是否存在，存在才下載並計數
+        async function checkAndDownload(toolId, filePath) {
+            try {
+                // 發動 HEAD 請求檢查伺服器上是否有這個檔案
+                const response = await fetch(filePath, { method: 'HEAD' });
 
-            alert(`正在為您下載 ${fileName} ... (目前累計下載：${count} 次)`);
+                if (response.ok) {
+                    // 檔案存在：累計下載次數
+                    let count = parseInt(localStorage.getItem(`mycad_download_${toolId}`) || 0) + 1;
+                    localStorage.setItem(`mycad_download_${toolId}`, count);
+                    document.getElementById(`count-${toolId}`).textContent = `下載: ${count} 次`;
+
+                    // 觸發真實檔案下載
+                    const link = document.createElement('a');
+                    link.href = filePath;
+                    link.download = filePath.split('/').pop();
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    // 檔案不存在 (404)
+                    alert(`【系統提示】伺服器尚未上傳此 .fas 檔案。\n檔案路徑：${filePath}\n請先將檔案放入對應資料夾中！`);
+                }
+            } catch (error) {
+                // 網路錯誤或跨域阻擋時的防呆提示
+                alert(`【提示】無法連線檢查檔案，或檔案路徑尚未建立。\n(您可以先建立名叫 "files" 的資料夾並放入 .fas 檔)`);
+            }
         }
 
-        // 搜尋與分類過濾
         function filterCategory(category, btnElement) {
             document.querySelectorAll('.nav-list button').forEach(btn => btn.classList.remove('active'));
             btnElement.classList.add('active');
