@@ -126,7 +126,7 @@
                     <label>密碼 (Password)</label>
                     <input type="password" id="passwordInput" class="form-control" placeholder="請輸入密碼">
                 </div>
-                <button class="btn" onclick="handleLogin()">安全登入</button>
+                <button class="btn" onclick="handleLogin()">登入系統</button>
                 <div id="errorMsg" class="error-msg"></div>
             </div>
 
@@ -205,7 +205,7 @@
             }
         }
 
-        // 使用 Supabase 進行真實帳號密碼驗證
+        // 直接從 Supabase 的 profiles 資料表比對帳號與密碼
         async function handleLogin() {
             const uInput = document.getElementById('usernameInput').value.trim();
             const pInput = document.getElementById('passwordInput').value.trim();
@@ -218,26 +218,31 @@
             }
 
             try {
-                // 將自訂帳號轉成內部登入用的 Email 格式 (例如 admin@mycad.internal)
-               // const loginEmail = `${uInput}@mycad.internal`;
-// 修改後的程式碼：
-const loginEmail = uInput;
-                const { data, error } = await _supabase.auth.signInWithPassword({
-                    email: loginEmail,
-                    password: pInput
-                });
+                const { data, error } = await _supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('username', uInput)
+                    .eq('is_active', true)
+                    .single();
 
-                if (error) throw error;
+                if (error || !data) {
+                    errBox.textContent = '查無此帳號或帳號未啟用';
+                    return;
+                }
 
-                // 從登入成功後的資料中取得姓名
-                const user = data.user;
-                const displayName = user.user_metadata?.full_name || uInput;
+                // 檢查資料庫裡的 pws 欄位是否相符
+                if (data.pws !== pInput) {
+                    errBox.textContent = '密碼錯誤！';
+                    return;
+                }
 
+                // 登入成功
+                const displayName = data.full_name || data.username;
                 sessionStorage.setItem('mycad_logged_name', displayName);
                 activateLoginUI(displayName);
 
             } catch (err) {
-                errBox.textContent = '帳號或密碼錯誤！';
+                errBox.textContent = '登入驗證發生錯誤';
             }
         }
 
@@ -250,7 +255,6 @@ const loginEmail = uInput;
         }
 
         function handleLogout() {
-            _supabase.auth.signOut();
             sessionStorage.removeItem('mycad_logged_name');
             document.body.classList.remove('logged-in');
             document.getElementById('loginSection').style.display = 'block';
