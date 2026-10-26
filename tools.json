@@ -10,11 +10,11 @@
 ]
 [
   {
-    "id": "bpoly",
-    "code": "DIM-01",
+    "id": "bpoly2",
+    "code": "DIM-012",
     "category": "geometry",
-    "name": "bpolycheck234 檢查工具",
+    "name": "bpolycheck234 檢查工具2",
     "filename": "bpolycheck234.fas",
-    "description": "專為圖面邊界與聚合線檢查設計的實用 AutoLISP 輔助程式。"
+    "description": "專為圖面邊界與聚合線檢查設計的實用 AutoLISP 輔助程式2。"
   }
 ]
