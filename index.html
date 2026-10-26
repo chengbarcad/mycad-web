@@ -19,6 +19,7 @@
             --header-height: 75px;
             --sidebar-width: 300px;
             --danger-color: #e74c3c;
+            --yt-color: #ff0000;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -96,6 +97,8 @@
         .architect-card h3 { font-size: 1.1rem; font-weight: 500; margin-bottom: 0.5rem; color: var(--text-main); }
         .architect-card p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.5; margin-bottom: 1.25rem; }
         
+        .card-actions { display: flex; flex-direction: column; gap: 0.5rem; }
+
         .download-btn {
             display: none; text-align: center; padding: 0.6rem 1rem; background-color: var(--bronze-tint);
             color: var(--bronze-accent); border: 1px solid rgba(192, 145, 89, 0.3); text-decoration: none;
@@ -103,6 +106,13 @@
             font-family: monospace;
         }
         .download-btn:hover { background-color: var(--bronze-accent); color: #121212; }
+
+        .youtube-btn {
+            display: block; text-align: center; padding: 0.5rem 1rem; background-color: rgba(255, 0, 0, 0.08);
+            color: #ff4d4d; border: 1px solid rgba(255, 0, 0, 0.25); text-decoration: none;
+            font-size: 0.82rem; border-radius: 3px; font-weight: 600; transition: all 0.2s;
+        }
+        .youtube-btn:hover { background-color: var(--yt-color); color: white; }
 
         body.logged-in .download-btn { display: block; }
 
@@ -186,13 +196,19 @@
             grid.innerHTML = '';
 
             tools.forEach((tool, index) => {
-                // 改用 filename 結合索引來作為下載次數的儲存鍵值
                 const storageKey = `mycad_download_${tool.filename}_${index}`;
                 let count = localStorage.getItem(storageKey) || 0;
 
                 const card = document.createElement('div');
                 card.className = 'architect-card';
                 card.setAttribute('data-name', tool.name);
+                
+                // 產生 YouTube 按鈕的 HTML（如果有填寫 youtube_url 才會顯示）
+                let ytButtonHtml = '';
+                if (tool.youtube_url) {
+                    ytButtonHtml = `<a href="${tool.youtube_url}" target="_blank" class="youtube-btn">▶ 觀看 YouTube 示範影片</a>`;
+                }
+
                 card.innerHTML = `
                     <div>
                         <div class="card-header-flex">
@@ -202,7 +218,10 @@
                         <h3>${tool.name}</h3>
                         <p>${tool.description}</p>
                     </div>
-                    <button class="download-btn" onclick="checkAndDownload('${storageKey}', '${tool.filename}', '${index}')">下載 ${tool.filename}</button>
+                    <div class="card-actions">
+                        <button class="download-btn" onclick="checkAndDownload('${storageKey}', '${tool.filename}', '${index}')">下載 ${tool.filename}</button>
+                        ${ytButtonHtml}
+                    </div>
                 `;
                 grid.appendChild(card);
             });
