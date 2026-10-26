@@ -19,7 +19,6 @@
             --header-height: 75px;
             --sidebar-width: 300px;
             --danger-color: #e74c3c;
-            --yt-color: #ff0000;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -84,19 +83,27 @@
         .search-box { width: 100%; max-width: 450px; padding: 0.75rem 1rem; background: var(--bg-canvas); border: 1px solid var(--border-architect); border-radius: 4px; font-size: 0.9rem; outline: none; color: var(--text-main); }
         .search-box:focus { border-color: var(--bronze-accent); }
 
-        .architect-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
+        .architect-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
         .architect-card {
             background-color: var(--surface-card); border: 1px solid var(--border-architect);
             border-radius: 4px; padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between;
             transition: all 0.3s ease;
         }
-        .architect-card:hover { transform: translateY(-3px); border-color: var(--bronze-accent); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6); }
+        .architect-card:hover { border-color: var(--bronze-accent); box-shadow: 0 8px 20px rgba(0, 0, 0, 0.6); }
         .card-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.75rem; }
         .card-tag { font-size: 0.7rem; font-family: monospace; color: var(--bronze-accent); text-transform: uppercase; }
         .download-count { font-size: 0.75rem; color: var(--text-muted); font-family: monospace; background: var(--bg-canvas); padding: 2px 6px; border-radius: 3px; border: 1px solid var(--border-architect); }
         .architect-card h3 { font-size: 1.1rem; font-weight: 500; margin-bottom: 0.5rem; color: var(--text-main); }
-        .architect-card p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.5; margin-bottom: 1.25rem; }
+        .architect-card p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.5; margin-bottom: 1rem; }
         
+        /* 內嵌 YouTube 播放器樣式 */
+        .embedded-video {
+            position: relative; width: 100%; padding-bottom: 56.25%; height: 0;
+            background: #000; border-radius: 3px; overflow: hidden; margin-bottom: 1rem;
+            border: 1px solid var(--border-architect);
+        }
+        .embedded-video iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
+
         .card-actions { display: flex; flex-direction: column; gap: 0.5rem; }
 
         .download-btn {
@@ -106,13 +113,6 @@
             font-family: monospace;
         }
         .download-btn:hover { background-color: var(--bronze-accent); color: #121212; }
-
-        .youtube-btn {
-            display: block; text-align: center; padding: 0.5rem 1rem; background-color: rgba(255, 0, 0, 0.08);
-            color: #ff4d4d; border: 1px solid rgba(255, 0, 0, 0.25); text-decoration: none;
-            font-size: 0.82rem; border-radius: 3px; font-weight: 600; transition: all 0.2s;
-        }
-        .youtube-btn:hover { background-color: var(--yt-color); color: white; }
 
         body.logged-in .download-btn { display: block; }
 
@@ -203,9 +203,14 @@
                 card.className = 'architect-card';
                 card.setAttribute('data-name', tool.name);
                 
-                let ytButtonHtml = '';
-                if (tool.youtube_url) {
-                    ytButtonHtml = `<a href="${tool.youtube_url}" target="_blank" class="youtube-btn">▶ 觀看 YouTube 示範影片</a>`;
+                // 內嵌 YouTube 播放器 HTML（若有填寫 youtube_id 則顯示，預設不自動播放）
+                let videoHtml = '';
+                if (tool.youtube_id) {
+                    videoHtml = `
+                        <div class="embedded-video">
+                            <iframe src="https://www.youtube.com/embed/${tool.youtube_id}" title="${tool.name} 示範影片" allowfullscreen></iframe>
+                        </div>
+                    `;
                 }
 
                 card.innerHTML = `
@@ -216,10 +221,10 @@
                         </div>
                         <h3>${tool.name}</h3>
                         <p>${tool.description}</p>
+                        ${videoHtml}
                     </div>
                     <div class="card-actions">
                         <button class="download-btn" onclick="checkAndDownload('${storageKey}', '${tool.filename}', '${index}')">下載 ${tool.filename}</button>
-                        ${ytButtonHtml}
                     </div>
                 `;
                 grid.appendChild(card);
