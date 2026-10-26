@@ -45,13 +45,25 @@
 
         .layout-container { display: flex; margin-top: var(--header-height); flex: 1; }
 
-        /* 左側登入面板 */
+        /* 左側導航與登入面板 */
         aside {
             width: var(--sidebar-width); background-color: var(--surface-card);
             border-right: 1px solid var(--border-architect); padding: 2rem 1.5rem;
             position: fixed; top: var(--header-height); bottom: 0; left: 0; overflow-y: auto; z-index: 999;
         }
         .nav-section-title { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 1.5px; color: var(--text-muted); margin-bottom: 1rem; border-left: 2px solid var(--text-muted); padding-left: 8px; }
+        
+        /* 分類按鈕清單樣式 */
+        .category-filter-list { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 2rem; }
+        .category-btn {
+            text-align: left; padding: 0.55rem 0.8rem; background: var(--bg-canvas);
+            color: var(--text-muted); border: 1px solid var(--border-architect); border-radius: 4px;
+            font-size: 0.85rem; cursor: pointer; transition: all 0.2s; font-family: monospace;
+            text-transform: uppercase;
+        }
+        .category-btn:hover { border-color: var(--bronze-accent); color: var(--text-main); }
+        .category-btn.active { background-color: var(--bronze-tint); border-color: var(--bronze-accent); color: var(--bronze-accent); font-weight: 600; }
+
         .form-group { margin-bottom: 1rem; }
         .form-group label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.3rem; font-family: monospace; }
         .form-control { 
@@ -96,7 +108,6 @@
         .architect-card h3 { font-size: 1.1rem; font-weight: 500; margin-bottom: 0.5rem; color: var(--text-main); }
         .architect-card p { color: var(--text-muted); font-size: 0.88rem; line-height: 1.5; margin-bottom: 1rem; }
         
-        /* 內嵌 YouTube 播放器樣式 */
         .embedded-video {
             position: relative; width: 100%; padding-bottom: 56.25%; height: 0;
             background: #000; border-radius: 3px; overflow: hidden; margin-bottom: 1rem;
@@ -130,8 +141,13 @@
     </header>
 
     <div class="layout-container">
-        <!-- 左側：登入面板 -->
+        <!-- 左側：分類過濾與登入面板 -->
         <aside>
+            <div class="nav-section-title">Categories Filter</div>
+            <div id="categoryContainer" class="category-filter-list">
+                <!-- 自動生成的分類按鈕會出現在這裡 -->
+            </div>
+
             <div class="nav-section-title">Member Authentication</div>
             
             <div id="loginSection">
@@ -175,6 +191,7 @@
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let allTools = [];
+        let currentCategory = 'all';
 
         window.addEventListener('DOMContentLoaded', () => {
             loadToolsData();
@@ -185,10 +202,61 @@
             try {
                 const response = await fetch('tools.json');
                 allTools = await response.json();
+                generateCategoryButtons(allTools);
                 renderCards(allTools);
             } catch (error) {
                 document.getElementById('toolGrid').innerHTML = '<p style="color:var(--danger-color);">無法載入 tools.json 設定檔。</p>';
             }
+        }
+
+        // 自動抓取 tools.json 中的分類並在左側生成按鈕
+        function generateCategoryButtons(tools) {
+            const container = document.getElementById('categoryContainer');
+            
+            // 收集所有不重複的 category
+            const categories = [...new Set(tools.map(tool => tool.category || 'uncategorized'))];
+            
+            let html = `<button class="category-btn active" onclick="filterByCategory('all', this)">⚡ 全部顯示 (All)</button>`;
+            
+            categories.forEach(cat => {
+                html += `<button class="category-btn" onclick="filterByCategory('${cat}', this)">📁 ${cat}</button>`;
+            });
+            
+            container.innerHTML = html;
+        }
+
+        // 點擊分類按鈕進行過濾
+        function filterByCategory(category, btnElement) {
+            currentCategory = category;
+            
+            // 切換按鈕的 active 樣式
+            document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
+            btnElement.classList.add('active');
+
+            applyFilters();
+        }
+
+        // 結合「分類過濾」與「關鍵字搜尋」
+        function applyFilters() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            
+            document.querySelectorAll('.architect-card').forEach(card => {
+                const name = card.getAttribute('data-name').toLowerCase();
+                const category = card.getAttribute('data-category');
+                
+                const matchesCategory = (currentCategory === 'all' || category === currentCategory);
+                const matchesSearch = name.includes(query);
+
+                if (matchesCategory && matchesSearch) {
+                    card.style.display = 'flex';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        }
+
+        function filterTools() {
+            applyFilters();
         }
 
         function renderCards(tools) {
@@ -198,12 +266,13 @@
             tools.forEach((tool, index) => {
                 const storageKey = `mycad_download_${tool.filename}_${index}`;
                 let count = localStorage.getItem(storageKey) || 0;
+                const toolCategory = tool.category || 'uncategorized';
 
                 const card = document.createElement('div');
                 card.className = 'architect-card';
                 card.setAttribute('data-name', tool.name);
+                card.setAttribute('data-category', toolCategory);
                 
-                // 內嵌 YouTube 播放器 HTML（若有填寫 youtube_id 則顯示，預設不自動播放）
                 let videoHtml = '';
                 if (tool.youtube_id) {
                     videoHtml = `
@@ -216,7 +285,7 @@
                 card.innerHTML = `
                     <div>
                         <div class="card-header-flex">
-                            <span class="card-tag">${tool.category}</span>
+                            <span class="card-tag">${toolCategory}</span>
                             <span class="download-count" id="count-${index}">下載: ${count} 次</span>
                         </div>
                         <h3>${tool.name}</h3>
@@ -314,14 +383,6 @@
             } catch (error) {
                 alert('連線異常');
             }
-        }
-
-        function filterTools() {
-            const query = document.getElementById('searchInput').value.toLowerCase();
-            document.querySelectorAll('.architect-card').forEach(card => {
-                const name = card.getAttribute('data-name').toLowerCase();
-                card.style.display = name.includes(query) ? 'flex' : 'none';
-            });
         }
     </script>
 </body>
