@@ -3,18 +3,21 @@
     "category": "geometry",
     "name": "bpolycheck234 檢查工具",
     "filename": "bpolycheck234.fas",
-    "description": "專為圖面邊界與聚合線檢查設計的實用 AutoLISP 輔助程式。"
+    "description": "專為圖面邊界與聚合線檢查設計的實用 AutoLISP 輔助程式。",
+    "youtube_url": "https://youtu.be/0lWBzeLW0y0?si=XtHgjsfyNcw-nwXX"
   },
   {
     "category": "geometry",
     "name": "bpolycheck234 檢查工具2",
     "filename": "bpolycheck234.fas",
-    "description": "專為圖面邊界與聚合線檢查設計的實用 AutoLISP 輔助程式2。"
+    "description": "專為圖面邊界與聚合線檢查設計的實用 AutoLISP 輔助程式2。",
+    "youtube_url": "https://youtu.be/0lWBzeLW0y0?si=XtHgjsfyNcw-nwXX"
   },
   {
     "category": "geometry",
     "name": "bpolycheck234 檢查工具3",
     "filename": "bpolycheck234.fas",
-    "description": "專為圖面邊界與聚合線檢查設計的實用 AutoLISP 輔助程式3。"
+    "description": "專為圖面邊界與聚合線檢查設計的實用 AutoLISP 輔助程式3。",
+    "youtube_url": "https://youtu.be/0lWBzeLW0y0?si=XtHgjsfyNcw-nwXX"
   }
 ]
