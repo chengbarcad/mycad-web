@@ -93,6 +93,7 @@
             display: none; text-align: center; padding: 0.6rem 1rem; background-color: var(--glass-blue-tint);
             color: var(--glass-blue); border: 1px solid rgba(52, 152, 219, 0.3); text-decoration: none;
             font-size: 0.85rem; border-radius: 3px; font-weight: 600; cursor: pointer; transition: all 0.2s;
+            font-family: monospace;
         }
         .download-btn:hover { background-color: var(--glass-blue); color: white; }
 
@@ -192,7 +193,7 @@
                         <h3>${tool.name}</h3>
                         <p>${tool.description}</p>
                     </div>
-                    <button class="download-btn" onclick="checkAndDownload('${tool.id}', '${tool.filename}')">下載程式 (.fas)</button>
+                    <button class="download-btn" onclick="checkAndDownload('${tool.id}', '${tool.filename}')">下載 ${tool.filename}</button>
                 `;
                 grid.appendChild(card);
             });
@@ -205,7 +206,6 @@
             }
         }
 
-        // 直接從 Supabase 的 profiles 資料表比對帳號與密碼
         async function handleLogin() {
             const uInput = document.getElementById('usernameInput').value.trim();
             const pInput = document.getElementById('passwordInput').value.trim();
@@ -230,13 +230,11 @@
                     return;
                 }
 
-                // 檢查資料庫裡的 pws 欄位是否相符
                 if (data.pws !== pInput) {
                     errBox.textContent = '密碼錯誤！';
                     return;
                 }
 
-                // 登入成功
                 const displayName = data.full_name || data.username;
                 sessionStorage.setItem('mycad_logged_name', displayName);
                 activateLoginUI(displayName);
