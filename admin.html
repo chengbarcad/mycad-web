@@ -108,7 +108,6 @@
     </div>
 
     <script>
-        // 已自動填入您的 Supabase 專案 URL，請把您的 Anon Public Key 貼在下方引號內
         const SUPABASE_URL = 'https://hqjwohytsberbeyisewq.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_iNASGZHnISSXXY9Egnw7TA_dAvzCSO1';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -170,10 +169,9 @@
                 msgBox.textContent = '成功新增客戶！';
                 document.getElementById('newUsername').value = '';
                 document.getElementById('newFullName').value = '';
-                
-                // 關鍵：新增成功後，立刻重新載入表格清單
                 await fetchClients();
             }
+        } <!-- 這裡補回了原本漏掉的大括號 -->
 
         // 刪除客戶
         async function deleteClient(id) {
