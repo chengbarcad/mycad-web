@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyCAD-APP - 專業 AutoLISP 工具庫與會員系統</title>
+    <title>MyCAD-APP - AutoLISP 工具庫 (TXT 紀錄版)</title>
     <style>
         :root {
             --bg-canvas: #f0f3f6;
@@ -13,7 +13,6 @@
             --glass-blue: #3498db;
             --glass-blue-tint: rgba(52, 152, 219, 0.06);
             --border-architect: #dcdde1;
-            --accent-red: #e74c3c;
             --header-height: 75px;
             --sidebar-width: 270px;
         }
@@ -39,12 +38,7 @@
         .brand { font-size: 1.2rem; font-weight: 800; letter-spacing: 2px; color: var(--steel-dark); display: flex; align-items: center; gap: 12px; }
         .brand-indicator { width: 10px; height: 10px; background-color: var(--glass-blue); box-shadow: 0 0 8px var(--glass-blue); }
         .brand span { color: var(--glass-blue); }
-        
-        /* 會員狀態列 */
-        .user-auth-bar { display: flex; align-items: center; gap: 15px; font-size: 0.9rem; }
-        .badge-role { background: var(--glass-blue-tint); color: var(--glass-blue); padding: 4px 10px; border-radius: 4px; border: 1px solid rgba(52,152,219,0.3); font-family: monospace; }
-        .auth-btn { background: var(--steel-dark); color: white; border: none; padding: 6px 14px; border-radius: 4px; cursor: pointer; }
-        .auth-btn:hover { background: var(--glass-blue); }
+        .header-meta { font-size: 0.85rem; color: var(--steel-silver); font-family: monospace; }
 
         .layout-container { display: flex; margin-top: var(--header-height); flex: 1; }
 
@@ -66,7 +60,7 @@
             background-color: var(--glass-blue-tint); color: var(--glass-blue); border-color: rgba(52, 152, 219, 0.3);
         }
 
-        /* 主內容區 */
+        /* 主內容 */
         main { margin-left: var(--sidebar-width); flex: 1; padding: 3rem; max-width: calc(100% - var(--sidebar-width)); }
         .hero-banner {
             background: linear-gradient(135deg, var(--surface-white) 0%, var(--glass-blue-tint) 100%);
@@ -76,15 +70,7 @@
         .hero-banner p { color: var(--steel-silver); font-size: 0.95rem; margin-bottom: 1.5rem; }
         .search-box { width: 100%; max-width: 500px; padding: 0.85rem 1.2rem; border: 1px solid var(--border-architect); border-radius: 4px; font-size: 0.95rem; outline: none; background: var(--surface-white); }
 
-        /* 管理員專用控制面板（預設隱藏） */
-        .admin-panel {
-            background: #fff; border: 2px dashed var(--glass-blue); padding: 1.5rem; border-radius: 4px; margin-bottom: 2rem; display: none;
-        }
-        .admin-panel h3 { color: var(--glass-blue); margin-bottom: 0.75rem; font-size: 1.1rem; }
-        .admin-form-group { display: flex; gap: 10px; flex-wrap: wrap; }
-        .admin-form-group input { padding: 8px; border: 1px solid var(--border-architect); border-radius: 4px; flex: 1; min-width: 200px; }
-
-        /* 工具卡片格線 */
+        /* 卡片網格 */
         .architect-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.5rem; }
         .architect-card {
             background-color: var(--surface-white); border: 1px solid var(--border-architect);
@@ -104,27 +90,23 @@
             font-size: 0.85rem; border-radius: 3px; font-weight: 600; cursor: pointer; transition: all 0.2s;
         }
         .download-btn:hover { background-color: var(--glass-blue); color: white; }
-        .download-btn.locked { background-color: #f8f9fa; color: #95a5a6; border-color: var(--border-architect); cursor: not-allowed; }
 
         @media (max-width: 768px) { sidebar { transform: translateX(-100%); } main { margin-left: 0; max-width: 100%; padding: 1.5rem; } }
     </style>
 </head>
 <body>
 
-    <!-- 頂欄 -->
     <header>
         <div class="brand">
             <div class="brand-indicator"></div>
             MYCAD<span>-APP</span>
         </div>
-        <div class="user-auth-bar">
-            <span class="badge-role" id="userRoleBadge">身份：訪客 (Guest)</span>
-            <button class="auth-btn" id="authToggleBtn" onclick="toggleRole()">模擬登入會員</button>
+        <div class="header-meta">
+            TXT STORAGE SYSTEM // 200+ TOOLS
         </div>
     </header>
 
     <div class="layout-container">
-        <!-- 側邊選單 -->
         <sidebar>
             <div class="nav-section-title">Tool Categories</div>
             <ul class="nav-list">
@@ -135,150 +117,88 @@
             </ul>
         </sidebar>
 
-        <!-- 主內容區 -->
         <main>
-            <!-- 管理員專用後台面板 (當身份切換為 Admin 時顯示) -->
-            <div class="admin-panel" id="adminPanel">
-                <h3>🛠️ 管理員專用控制台 (Admin Panel)</h3>
-                <p style="font-size: 0.85rem; color: var(--steel-silver); margin-bottom: 1rem;">您目前擁有最高管理權限，可於此上傳新工具或管理系統權限。</p>
-                <div class="admin-form-group">
-                    <input type="text" id="newToolName" placeholder="輸入新工具名稱 (例如：標高自動點註)">
-                    <input type="text" id="newToolCode" placeholder="編號代碼 (例如：ARC-03)">
-                    <button class="auth-btn" onclick="addNewTool()">上傳/新增工具</button>
-                </div>
-            </div>
-
             <div class="hero-banner">
-                <h1>AutoLISP 專業工具庫與檔案系統</h1>
-                <p>安全、高效的建築工程 `.fas` 模組管理平台（試用期至 2026/11/01）。</p>
+                <h1>AutoLISP 專業工具庫（TXT 輕量計數）</h1>
+                <p>透過前端模擬資料庫與本地狀態，即時統計與管理 .fas 檔案下載次數。</p>
                 <input type="text" id="searchInput" class="search-box" placeholder="輸入關鍵字搜尋工具（例如：樓梯、面積、AvgZ...）" onkeyup="filterTools()">
             </div>
 
-            <!-- 工具卡片列表 -->
             <div class="architect-grid" id="toolGrid">
                 
                 <div class="architect-card" data-category="architectural" data-name="參數式畫樓梯剖面 樓梯剖面">
                     <div>
                         <div class="card-header-flex">
                             <span class="card-tag">Architectural // ARC-01</span>
-                            <span class="download-count" id="count-stair">下載: 42 次</span>
+                            <span class="download-count" id="count-stair">下載: 0 次</span>
                         </div>
                         <h3>參數式畫樓梯剖面</h3>
                         <p>透過參數式試算表快速繪製精準的樓梯剖面圖，大幅提升繪圖效率。</p>
                     </div>
-                    <button class="download-btn" id="btn-stair" onclick="handleDownload('stair', 'stair_profile.fas')">下載程式 (.fas)</button>
+                    <button class="download-btn" onclick="recordDownload('stair', 'stair_profile.fas')">下載程式 (.fas)</button>
                 </div>
 
                 <div class="architect-card" data-category="geometry" data-name="PL-DIM 聚合線標面積">
                     <div>
                         <div class="card-header-flex">
                             <span class="card-tag">Geometry // DIM-01</span>
-                            <span class="download-count" id="count-pldim">下載: 89 次</span>
+                            <span class="download-count" id="count-pldim">下載: 0 次</span>
                         </div>
                         <h3>PL-DIM 聚合線標面積</h3>
                         <p>支援聚合線 (PLINE) 快速標註面積及統計周長，並可進行編號與快速標面積。</p>
                     </div>
-                    <button class="download-btn" id="btn-pldim" onclick="handleDownload('pldim', 'PL-DIM.fas')">下載程式 (.fas)</button>
+                    <button class="download-btn" onclick="recordDownload('pldim', 'PL-DIM.fas')">下載程式 (.fas)</button>
                 </div>
 
                 <div class="architect-card" data-category="utility" data-name="AvgZ 座標與數值平均">
                     <div>
                         <div class="card-header-flex">
                             <span class="card-tag">Utility // UTL-01</span>
-                            <span class="download-count" id="count-avgz">下載: 56 次</span>
+                            <span class="download-count" id="count-avgz">下載: 0 次</span>
                         </div>
                         <h3>AvgZ 座標與數值平均</h3>
                         <p>專為工程計算設計的座標與標高平均值快速計算輔助工具。</p>
                     </div>
-                    <button class="download-btn" id="btn-avgz" onclick="handleDownload('avgz', 'AvgZ.fas')">下載程式 (.fas)</button>
+                    <button class="download-btn" onclick="recordDownload('avgz', 'AvgZ.fas')">下載程式 (.fas)</button>
                 </div>
 
             </div>
         </main>
     </div>
 
-    <!-- 系統權限與下載互動邏輯 -->
     <script>
-        // 模擬會員狀態: 'guest' (訪客) -> 'member' (會員) -> 'admin' (管理員)
-        let currentUserRole = 'guest';
+        // 初始化載入下載次數（對應 TXT 資料庫概念）
+        window.addEventListener('DOMContentLoaded', () => {
+            loadCounts();
+        });
 
-        function toggleRole() {
-            if (currentUserRole === 'guest') {
-                currentUserRole = 'member';
-                document.getElementById('userRoleBadge').textContent = '身份：正式會員 (Member)';
-                document.getElementById('authToggleBtn').textContent = '切換為管理員';
-                document.getElementById('adminPanel').style.display = 'none';
-            } else if (currentUserRole === 'member') {
-                currentUserRole = 'admin';
-                document.getElementById('userRoleBadge').textContent = '身份：系統管理員 (Admin)';
-                document.getElementById('authToggleBtn').textContent = '登出 (回訪客)';
-                document.getElementById('adminPanel').style.display = 'block';
-            } else {
-                currentUserRole = 'guest';
-                document.getElementById('userRoleBadge').textContent = '身份：訪客 (Guest)';
-                document.getElementById('authToggleBtn').textContent = '模擬登入會員';
-                document.getElementById('adminPanel').style.display = 'none';
-            }
-            updateDownloadButtons();
-        }
-
-        function updateDownloadButtons() {
-            const buttons = document.querySelectorAll('.download-btn');
-            buttons.forEach(btn => {
-                if (currentUserRole === 'guest') {
-                    btn.textContent = '🔒 會員限定下載';
-                    btn.classList.add('locked');
-                } else {
-                    btn.textContent = '下載程式 (.fas)';
-                    btn.classList.remove('locked');
-                }
+        function loadCounts() {
+            const tools = ['stair', 'pldim', 'avgz'];
+            tools.forEach(toolId => {
+                let count = localStorage.getItem(`mycad_download_${toolId}`) || 0;
+                document.getElementById(`count-${toolId}`).textContent = `下載: ${count} 次`;
             });
         }
 
-        function handleDownload(toolId, fileName) {
-            if (currentUserRole === 'guest') {
-                alert('【權限提示】此工具為會員限定！全功能試用期至 2026/11/01，請聯絡 cheng.bar.cad@gmail.com 申請會員。');
-                return;
-            }
-            alert(`驗證成功！(${currentUserRole === 'admin' ? '管理員' : '正式會員'}) 正在為您下載 ${fileName} ...`);
-        }
-
-        function addNewTool() {
-            const name = document.getElementById('newToolName').value;
-            const code = document.getElementById('newToolCode').value;
-            if(!name || !code) {
-                alert('請完整填寫工具名稱與編號！');
-                return;
-            }
+        function recordDownload(toolId, fileName) {
+            // 讀取現有次數並 +1
+            let count = parseInt(localStorage.getItem(`mycad_download_${toolId}`) || 0) + 1;
             
-            const grid = document.getElementById('toolGrid');
-            const newCard = document.createElement('div');
-            newCard.className = 'architect-card';
-            newCard.setAttribute('data-category', 'architectural');
-            newCard.setAttribute('data-name', name);
-            newCard.innerHTML = `
-                <div>
-                    <div class="card-header-flex">
-                        <span class="card-tag">Custom // ${code}</span>
-                        <span class="download-count">下載: 0 次</span>
-                    </div>
-                    <h3>${name}</h3>
-                    <p>由管理員新上傳的 AutoLISP 程式模組。</p>
-                </div>
-                <button class="download-btn" onclick="handleDownload('custom', '${code}.fas')">下載程式 (.fas)</button>
-            `;
-            grid.appendChild(newCard);
-            alert(`成功新增工具：${name} (${code})！`);
-            document.getElementById('newToolName').value = '';
-            document.getElementById('newToolCode').value = '';
+            // 寫回「資料庫」（模擬 TXT 儲存）
+            localStorage.setItem(`mycad_download_${toolId}`, count);
+            
+            // 即時更新畫面上的下載次數
+            document.getElementById(`count-${toolId}`).textContent = `下載: ${count} 次`;
+
+            alert(`正在為您下載 ${fileName} ... (目前累計下載：${count} 次)`);
         }
 
-        // 搜尋過濾
+        // 搜尋與分類過濾
         function filterCategory(category, btnElement) {
             document.querySelectorAll('.nav-list button').forEach(btn => btn.classList.remove('active'));
             btnElement.classList.add('active');
-            // 簡化過濾展示
         }
+
         function filterTools() {
             const query = document.getElementById('searchInput').value.toLowerCase();
             document.querySelectorAll('.architect-card').forEach(card => {
@@ -286,11 +206,6 @@
                 card.style.display = name.includes(query) ? 'flex' : 'none';
             });
         }
-
-        // 初始化檢查權限
-        window.addEventListener('DOMContentLoaded', () => {
-            updateDownloadButtons();
-        });
     </script>
 </body>
 </html>
