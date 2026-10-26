@@ -108,9 +108,9 @@
     </div>
 
     <script>
-        // TODO: 請填入您從 Supabase 專案設定 (Settings -> API) 取得的 URL 與 Anon Public Key
-        const SUPABASE_URL = '您的Supabase專案網址';
-        const SUPABASE_ANON_KEY = '您的Supabase專案AnonKey';
+        // 已自動填入您的 Supabase 專案 URL，請把您的 Anon Public Key 貼在下方引號內
+        const SUPABASE_URL = 'https://hqjwohytsberbeyisewq.supabase.co';
+        const SUPABASE_ANON_KEY = '請在此貼上您的Supabase_Anon_Key';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -170,7 +170,7 @@
                 msgBox.textContent = '成功新增客戶！';
                 document.getElementById('newUsername').value = '';
                 document.getElementById('newFullName').value = '';
-                fetchClients(); // 重新整理列表
+                fetchClients();
             }
         }
 
@@ -182,7 +182,7 @@
             if (error) {
                 alert(`刪除失敗: ${error.message}`);
             } else {
-                fetchClients(); // 重新整理列表
+                fetchClients();
             }
         }
     </script>
