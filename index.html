@@ -219,8 +219,9 @@
 
             try {
                 // 將自訂帳號轉成內部登入用的 Email 格式 (例如 admin@mycad.internal)
-                const loginEmail = `${uInput}@mycad.internal`;
-
+               // const loginEmail = `${uInput}@mycad.internal`;
+// 修改後的程式碼：
+const loginEmail = uInput;
                 const { data, error } = await _supabase.auth.signInWithPassword({
                     email: loginEmail,
                     password: pInput
