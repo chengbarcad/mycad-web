@@ -61,7 +61,6 @@
         .btn:hover { background-color: #2980b9; }
         .error-msg { color: #e74c3c; font-size: 0.8rem; margin-top: 0.5rem; }
         
-        /* 登入後的側邊欄狀態 */
         .user-panel { background: var(--glass-blue-tint); padding: 1rem; border-radius: 4px; border: 1px solid rgba(52, 152, 219, 0.2); margin-bottom: 1.5rem; }
         .user-panel h4 { font-size: 0.95rem; margin-bottom: 0.3rem; color: var(--steel-dark); }
         .user-panel p { font-size: 0.85rem; color: var(--steel-silver); margin-bottom: 0.75rem; }
@@ -90,7 +89,6 @@
         .architect-card h3 { font-size: 1.1rem; font-weight: 600; margin-bottom: 0.5rem; }
         .architect-card p { color: var(--steel-silver); font-size: 0.88rem; line-height: 1.5; margin-bottom: 1.25rem; }
         
-        /* 下載按鈕預設隱藏 (未登入時不顯示) */
         .download-btn {
             display: none; text-align: center; padding: 0.6rem 1rem; background-color: var(--glass-blue-tint);
             color: var(--glass-blue); border: 1px solid rgba(52, 152, 219, 0.3); text-decoration: none;
@@ -98,7 +96,6 @@
         }
         .download-btn:hover { background-color: var(--glass-blue); color: white; }
 
-        /* 登入後啟動此class以顯示按鈕 */
         body.logged-in .download-btn { display: block; }
 
         @media (max-width: 768px) { aside { position: relative; width: 100%; height: auto; } main { margin-left: 0; max-width: 100%; padding: 1.5rem; } }
@@ -119,7 +116,6 @@
         <aside>
             <div class="nav-section-title">Member Authentication</div>
             
-            <!-- 未登入表單 -->
             <div id="loginSection">
                 <p style="font-size: 0.85rem; color: var(--steel-silver); margin-bottom: 1rem;">請輸入已註冊的帳號登入</p>
                 <div class="form-group">
@@ -130,7 +126,6 @@
                 <div id="errorMsg" class="error-msg"></div>
             </div>
 
-            <!-- 登入後顯示的會員資訊面板（預設隱藏） -->
             <div id="userPanelSection" style="display: none;">
                 <div class="user-panel">
                     <h4 id="welcomeName"></h4>
@@ -148,13 +143,11 @@
                 <input type="text" id="searchInput" class="search-box" placeholder="搜尋工具關鍵字..." onkeyup="filterTools()">
             </div>
 
-            <!-- 自動生成的工具卡片網格 -->
             <div class="architect-grid" id="toolGrid"></div>
         </main>
     </div>
 
     <script>
-        // Supabase 連線設定
         const SUPABASE_URL = 'https://hqjwohytsberbeyisewq.supabase.co';
         const SUPABASE_ANON_KEY = 'sb_publishable_iNASGZHnISSXXY9Egnw7TA_dAvzCSO1';
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -166,7 +159,6 @@
             checkSession();
         });
 
-        // 讀取 tools.json
         async function loadToolsData() {
             try {
                 const response = await fetch('tools.json');
@@ -177,7 +169,6 @@
             }
         }
 
-        // 渲染卡片
         function renderCards(tools) {
             const grid = document.getElementById('toolGrid');
             grid.innerHTML = '';
@@ -191,8 +182,102 @@
                 card.innerHTML = `
                     <div>
                         <div class="card-header-flex">
-                            <span class="card-tag">${tool.category} //${tool.code}</span>
+                            <span class="card-tag">${tool.category} // ${tool.code}</span>
                             <span class="download-count" id="count-${tool.id}">下載: ${count} 次</span>
                         </div>
                         <h3>${tool.name}</h3>
-                        <p
+                        <p>${tool.description}</p>
+                    </div>
+                    <button class="download-btn" onclick="checkAndDownload('${tool.id}', '${tool.filename}')">下載程式 (.fas)</button>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function checkSession() {
+            const savedName = sessionStorage.getItem('mycad_logged_name');
+            if (savedName) {
+                activateLoginUI(savedName);
+            }
+        }
+
+        async function handleLogin() {
+            const uInput = document.getElementById('usernameInput').value.trim();
+            const errBox = document.getElementById('errorMsg');
+            errBox.textContent = '';
+
+            if (!uInput) {
+                errBox.textContent = '請輸入帳號';
+                return;
+            }
+
+            try {
+                const { data, error } = await _supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('username', uInput)
+                    .eq('is_active', true)
+                    .single();
+
+                if (error || !data) {
+                    errBox.textContent = '查無此帳號或帳號未啟用';
+                    return;
+                }
+
+                sessionStorage.setItem('mycad_logged_name', data.full_name || data.username);
+                activateLoginUI(data.full_name || data.username);
+
+            } catch (err) {
+                errBox.textContent = '登入驗證發生錯誤';
+            }
+        }
+
+        function activateLoginUI(name) {
+            document.body.classList.add('logged-in');
+            document.getElementById('loginSection').style.display = 'none';
+            document.getElementById('userPanelSection').style.display = 'block';
+            document.getElementById('welcomeName').textContent = `歡迎，${name}`;
+            document.getElementById('headerStatus').textContent = `已驗證身分：${name}`;
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('mycad_logged_name');
+            document.body.classList.remove('logged-in');
+            document.getElementById('loginSection').style.display = 'block';
+            document.getElementById('userPanelSection').style.display = 'none';
+            document.getElementById('usernameInput').value = '';
+            document.getElementById('headerStatus').textContent = '系統狀態：訪客瀏覽 (未登入)';
+        }
+
+        async function checkAndDownload(toolId, fileName) {
+            try {
+                const response = await fetch(fileName, { method: 'HEAD' });
+                if (response.ok) {
+                    let count = parseInt(localStorage.getItem(`mycad_download_${toolId}`) || 0) + 1;
+                    localStorage.setItem(`mycad_download_${toolId}`, count);
+                    document.getElementById(`count-${toolId}`).textContent = `下載: ${count} 次`;
+
+                    const link = document.createElement('a');
+                    link.href = fileName;
+                    link.download = fileName;
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } else {
+                    alert(`找不到檔案：${fileName}`);
+                }
+            } catch (error) {
+                alert('連線異常');
+            }
+        }
+
+        function filterTools() {
+            const query = document.getElementById('searchInput').value.toLowerCase();
+            document.querySelectorAll('.architect-card').forEach(card => {
+                const name = card.getAttribute('data-name').toLowerCase();
+                card.style.display = name.includes(query) ? 'flex' : 'none';
+            });
+        }
+    </script>
+</body>
+</html>
