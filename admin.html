@@ -170,9 +170,10 @@
                 msgBox.textContent = '成功新增客戶！';
                 document.getElementById('newUsername').value = '';
                 document.getElementById('newFullName').value = '';
-                fetchClients();
+                
+                // 關鍵：新增成功後，立刻重新載入表格清單
+                await fetchClients();
             }
-        }
 
         // 刪除客戶
         async function deleteClient(id) {
